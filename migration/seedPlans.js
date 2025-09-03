@@ -11,7 +11,7 @@ import adminAuthModel from '../models/admin/adminAuth.js';
 
 // const createFirstCounter = async () => {
 //   try {
-//     await mongoose.connect(`mongodb+srv://saikatsaharph:nIyMOzJzGaCP5yX5@cluster0.4mqz16w.mongodb.net/gym`);
+//     await mongoose.connect(`enter mongo uri here`);
 
 //     const newCounter = {
 //       _id: "2025", // Year
@@ -44,7 +44,7 @@ import adminAuthModel from '../models/admin/adminAuth.js';
 
 const createFirstAdmin = async () => {
   try {
-    await mongoose.connect(`mongodb+srv://saikatsaharph:nIyMOzJzGaCP5yX5@cluster0.4mqz16w.mongodb.net/gym`);
+    await mongoose.connect(`enter mongo uri here`);
 
     const existingAdmin = await adminAuthModel.findOne({ email: "saikatservices@gmail.com" });
     if (existingAdmin) {
@@ -86,7 +86,7 @@ createFirstAdmin();
 
 // const seedPlans = async () => {
 //   try {
-//     await mongoose.connect(`mongodb+srv://saikatsaharph:nIyMOzJzGaCP5yX5@cluster0.4mqz16w.mongodb.net/gym`);
+//     await mongoose.connect(`enter mongo uri here`);
 
 //     const plans = [
 //       {
