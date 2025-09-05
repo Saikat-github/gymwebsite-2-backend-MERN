@@ -1,13 +1,44 @@
 import nodemailer from 'nodemailer';
 
 const frontendUrl = process.env.FRONTEND_URL
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: process.env.EMAIL_USERNAME,
+//     pass: process.env.EMAIL_PASSWORD
+//   }
+// });
+
+
+
+// Updated transporter configuration with more robust settings
+const transporter = nodemailer.createTransporter({
+  host: 'smtp.gmail.com',
+  port: 587, // or try 465 for SSL
+  secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USERNAME,
     pass: process.env.EMAIL_PASSWORD
+  },
+  tls: {
+    rejectUnauthorized: false // Add this for production environments
+  },
+  connectionTimeout: 60000, // 60 seconds
+  greetingTimeout: 30000, // 30 seconds
+  socketTimeout: 60000, // 60 seconds
+});
+
+
+// Add connection verification
+transporter.verify((error, success) => {
+  if (error) {
+    console.log('SMTP connection error:', error);
+  } else {
+    console.log('SMTP server is ready to take messages');
   }
 });
+
+
 
 
 
