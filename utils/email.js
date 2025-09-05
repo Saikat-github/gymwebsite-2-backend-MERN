@@ -14,19 +14,17 @@ const frontendUrl = process.env.FRONTEND_URL
 // Updated transporter configuration with more robust settings
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 587, // or try 465 for SSL
-  secure: false, // true for 465, false for other ports
+  port: 465,        // ← Change from 587 to 465
+  secure: true,     // ← Change from false to true
   auth: {
     user: process.env.EMAIL_USERNAME,
     pass: process.env.EMAIL_PASSWORD
   },
   tls: {
-    rejectUnauthorized: false // Add this for production environments
-  },
-  connectionTimeout: 60000, // 60 seconds
-  greetingTimeout: 30000, // 30 seconds
-  socketTimeout: 60000, // 60 seconds
+    rejectUnauthorized: false  // ← Add this for Railway
+  }
 });
+
 
 
 // Add connection verification
@@ -39,6 +37,26 @@ transporter.verify((error, success) => {
 });
 
 
+
+const sendEmailWithRetry = async (mailOptions, maxRetries = 3) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await transporter.sendMail(mailOptions);
+      console.log(`✅ Email sent successfully on attempt ${attempt}`);
+      return result;
+    } catch (error) {
+      console.error(`❌ Email attempt ${attempt} failed:`, error.message);
+
+      if (attempt === maxRetries) {
+        throw new Error(`Failed to send email after ${maxRetries} attempts: ${error.message}`);
+      }
+
+      // Wait before retry (exponential backoff)
+      const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
 
 
 
@@ -58,7 +76,7 @@ const sendOTPEmail = async (email, otp) => {
         <br>
         <p><strong>Team Minimalist Gym.</strong></p> </div>`
   };
-  await transporter.sendMail(mailOptions);
+  await sendEmailWithRetry(mailOptions);
 };
 
 
@@ -75,7 +93,7 @@ const sendSubscriptionExpiredEmail = async (email, name = "User", endDate) => {
     html: `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;"> <h2 style="color:#007BFF;">Subscription Expired</h2> <p>Hi ${name},</p> <p>Your membership has expired on ${date.toLocaleDateString('en-US', options)}.</p> <p>To continue using our gym services, we recommend subscribing to a suitable plan.</p> <a href="${frontendUrl}/plans" style="display:inline-block;padding:10px 15px;background-color:#28a745;color:#fff;border-radius:5px;text-decoration:none;">Renew Membership </a>  <p>Warm regards,<br><strong>Team Minimalist Gym.</strong></p> </div>`
   };
-  await transporter.sendMail(mailOptions);
+  await sendEmailWithRetry(mailOptions);
 }
 
 
@@ -93,7 +111,7 @@ const sendReminderEmail = async (email, name, endDate) => {
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;"> <h2 style="color:#ff8800;">Your Membership is Ending Soon</h2> <p>Hi ${name},</p> <p>You have <strong>${daysLeft} days</strong> remaining in your active membership.</p> <p>Don't miss out on uninterrupted access to <strong>Minimalist Gym</strong>.</p> <a href="${frontendUrl}/plans" style="display:inline-block;padding:10px 15px;background-color:#007BFF;color:#fff;border-radius:5px;text-decoration:none;">Renew Now</a> <p style="margin-top:30px;">Thank you for being with us.</p> <p>Warm wishes,<br><strong>Team Minimalist Gym</strong></p> </div>
       `
   }
-  await transporter.sendMail(mailOptions);
+  await sendEmailWithRetry(mailOptions);
 }
 
 
@@ -110,7 +128,7 @@ const sendProfileDeletionMail = async (email, name = "User") => {
     html: `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;"> <h2 style="color:#dc3545;">Profile Deleted</h2> <p>Hi ${name},</p> <p>We're confirming that your profile in <strong>Minimalist Gym</strong> has been deleted.</p> <p>This means you no longer have access to features or booking capabilities.</p> <p>If this was a mistake, or you change your mind, you can always create a new profile:</p> <a href="${frontendUrl}/profile" style="display:inline-block;padding:10px 15px;background-color:#007BFF;color:#fff;border-radius:5px;text-decoration:none;">Create Profile</a> <p>Thanks again for trying Minimalist Gym.</p> <p>Warm regards,<br><strong>Team Minimalist Gym.</strong></p> </div>`
   };
-  await transporter.sendMail(mailOptions);
+  await sendEmailWithRetry(mailOptions);
 }
 
 
@@ -123,7 +141,7 @@ const sendAccountDeletionMail = async (email, name = "User") => {
     html: `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;"> <h2 style="color:#dc3545;">Account Deleted</h2> <p>Hi ${name},</p> <p>We're confirming that your account and all profile data in <strong>Minimalist Gym.</strong> has been deleted.</p> <p>This means you no longer have access to features or booking capabilities.</p> <p>If this was a mistake, or you change your mind, you can always create a new Account:</p> <a href="${frontendUrl}" style="display:inline-block;padding:10px 15px;background-color:#007BFF;color:#fff;border-radius:5px;text-decoration:none;">Create Account</a> <p>Thanks again for trying Minimalist Gym.</p> <p>Warm regards,<br><strong>Team Minimalist Gym.</strong></p> </div>`
   };
-  await transporter.sendMail(mailOptions);
+  await sendEmailWithRetry(mailOptions);
 }
 
 
