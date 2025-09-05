@@ -12,7 +12,7 @@ const frontendUrl = process.env.FRONTEND_URL
 
 
 // Updated transporter configuration with more robust settings
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587, // or try 465 for SSL
   secure: false, // true for 465, false for other ports
