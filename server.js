@@ -90,6 +90,9 @@ app.use(globalRateLimiter)
 //API endpoints
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
 
 
 // Health check endpoint for production monitoring
