@@ -18,22 +18,10 @@ const getDashData = async (req, res) => {
                         _id: null,
                         totalProfiles: { $sum: 1 },
                         maleCount: {
-                            $sum: {
-                                $cond: [
-                                    { $eq: ["$personalInfo.gender", "male"] },
-                                    1,
-                                    0
-                                ]
-                            }
+                            $sum: { $cond: [{ $eq: ["$personalInfo.gender", "male"] }, 1, 0 ]}
                         },
                         femaleCount: {
-                            $sum: {
-                                $cond: [
-                                    { $eq: ["$personalInfo.gender", "female"] },
-                                    1,
-                                    0
-                                ]
-                            }
+                            $sum: {$cond: [{ $eq: ["$personalInfo.gender", "female"] }, 1, 0 ]}
                         }
                     }
                 }

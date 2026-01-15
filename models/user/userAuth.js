@@ -42,7 +42,8 @@ const userAuthSchema = new Schema({
     {
         minimize: false,
         timestamps: true
-    });
+    }
+);
 
 
 // Validation: Ensure at least one authentication method (password or googleId)

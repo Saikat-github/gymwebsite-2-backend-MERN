@@ -20,7 +20,7 @@ const updatePlan = async (req, res) => {
         if (!plan) {
             return res.json({ success: false, message: "Plan not found" });
         }
-        await planModel.findByIdAndUpdate(planId, updatedData, { new: true });
+        await planModel.findByIdAndUpdate(planId, updatedData, { runValidators: true });
         res.json({ success: true, message: "Plan updated successfully" });
     } catch (error) {
         console.log(error);

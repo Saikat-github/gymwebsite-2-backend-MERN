@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
-const planSchema = new mongoose.Schema(
-    {
+const planSchema = new mongoose.Schema({
         title: {
             type: String,
             required: [true, "Plan name is required"],

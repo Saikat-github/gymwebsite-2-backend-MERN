@@ -37,7 +37,7 @@ const userPaymentSchema = new mongoose.Schema({
     },
     orderId: {
         type: String,
-        required: function () { return this.paymentMode === 'online'; },
+        required: function () { return this.paymentMethod === 'online'; },
     },
     paymentId: {
         type: String
