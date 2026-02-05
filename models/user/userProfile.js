@@ -146,11 +146,6 @@ const userProfileSchema = new Schema({
         default: false
     },
 
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-
     userAuthId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'userAuth',

@@ -10,7 +10,7 @@ export const generateSerialNumber = async (prefix="DP") => {
   const counter = await counterModel.findByIdAndUpdate(
     id,
     { $inc: { seq: 1 } },
-    { new: true, upsert: true } // Create if doesn't exist
+    { new: true, upsert: true } // upsert: true - Create if doesn't exist
   );
 
   const serial = counter.seq.toString().padStart(4, "0"); // e.g., 0001, 0256

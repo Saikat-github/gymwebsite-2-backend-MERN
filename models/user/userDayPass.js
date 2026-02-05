@@ -4,7 +4,7 @@ const userDayPassSchema = new mongoose.Schema(
     {
         userAuthId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "userAuth", // reference to your auth model
+            ref: "userAuth", // reference to auth model
             required: true,
             index: true, // for faster lookup
         },
@@ -50,16 +50,14 @@ const userDayPassSchema = new mongoose.Schema(
         },
         paymentId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "userPayment", // links to your payments collection
+            ref: "userPayment", // links to payments collection
             required: true,
         },
         terms: {
             type: Boolean,
             required: true,
             validate: {
-                validator: function (v) {
-                    return v === true; // must accept terms
-                },
+                validator: (value) => value === true,
                 message: "You must accept terms and conditions to proceed",
             },
         },

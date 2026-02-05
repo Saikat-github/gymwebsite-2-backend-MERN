@@ -39,24 +39,21 @@ import adminAuthModel from '../models/admin/adminAuth.js';
 
 
 
-
-
-
 const createFirstAdmin = async () => {
   try {
     await mongoose.connect(`enter mongo uri here`);
 
-    const existingAdmin = await adminAuthModel.findOne({ email: "saikatservices@gmail.com" });
+    const existingAdmin = await adminAuthModel.findOne({ email: process.env.SUPER_ADMIN_EMAIL });
     if (existingAdmin) {
       console.log('Super admin already exists');
       process.exit(0);
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash("Saikat@123", salt);
+    const hashedPassword = await bcrypt.hash(process.env.SUPER_ADMIN_PASSWORD, salt);
 
     await new adminAuthModel({
-      email: "saikatservices@gmail.com",
+      email: process.env.SUPER_ADMIN_EMAIL,
       password: hashedPassword,
       userType: 'super_admin',
     }).save();

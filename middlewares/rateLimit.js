@@ -3,7 +3,7 @@ import rateLimit from 'express-rate-limit';
 const globalRateLimiter =  rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 1000, // Limit each IP to 1000 requests per windowMs
-  message: "Too many requests from this IP, please later after 1 hour."
+  message: "Too many requests from this IP, please try later after 1 hour."
 });
 
 

@@ -1,5 +1,5 @@
-import userAuthModel from "../../models/user/userAuth.js";
 import { applyPagination, applyPaginationForDayPasses } from "../../utils/applyPagination.js";
+import userAuthModel from "../../models/user/userAuth.js";
 import userProfileModel from '../../models/user/userProfile.js';
 import userPaymentModel from '../../models/user/userPayment.js';
 import userDayPassModel from '../../models/user/userDayPass.js';

@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
 
 const Schema = mongoose.Schema;
 
@@ -24,10 +23,6 @@ const userAuthSchema = new Schema({
     },
     name: String,
     googleId: String,
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
     profileCompleted: Boolean,
     profileId: {
         type: Schema.Types.ObjectId,

@@ -1,4 +1,6 @@
-export const applyPagination = async (query, model, cursor, limit = 15,) => {
+
+
+export const applyPagination = async (query, model, cursor, limit = 10) => {
     if (cursor) {
         const cursorDate = new Date(cursor);
         if (!isNaN(cursorDate.getTime())) {
@@ -29,7 +31,7 @@ export const applyPagination = async (query, model, cursor, limit = 15,) => {
 
 
 
-export const applyPaginationForDayPasses = async (query, model, cursor, limit = 15) => {
+export const applyPaginationForDayPasses = async (query, model, cursor, limit = 10) => {
     if (cursor) {
         const cursorDate = new Date(cursor);
         if (!isNaN(cursorDate.getTime())) {

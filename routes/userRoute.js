@@ -39,7 +39,7 @@ userRouter.get(
 
 //Normal Passport Authentication
 userRouter.post("/signup-sendotp", sendUserOtpLimiter, sendSignupOtp);
-userRouter.post("/signup", loginLimiter, validateInputs(registerValidation), verifyAndSignupOtp);
+userRouter.post("/signup-verifyotp", loginLimiter, validateInputs(registerValidation), verifyAndSignupOtp);
 userRouter.post("/login", loginLimiter, validateInputs(loginValidation), userLogin);
 userRouter.get('/logout', userLogout);
 userRouter.get('/current_user', authUser, getUser);

@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const otpSchema = new mongoose.Schema({
     userType: {
         type: String,
-        enum: ['admin', 'user'],
+        enum: ['admin', 'user', 'super-admin'],
         required: true
     },
     email: {

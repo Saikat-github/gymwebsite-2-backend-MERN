@@ -21,10 +21,6 @@ const adminAuthSchema = new Schema({
         minlength: [8, 'Password must be at least 8 characters long'],
         required: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
     resetPasswordOTP: String,
     resetPasswordOTPExpiry: Date,
     otpAttempts: { type: Number, default: 0 },

@@ -18,7 +18,7 @@ const adminRouter = express.Router()
 
 //Normal Passport Authentication
 adminRouter.post("/signup-sendotp", authAdmin(["super_admin"]), sendUserOtpLimiter, sendSignupOtp);
-adminRouter.post("/signup",authAdmin(["super_admin"]), loginLimiter, validateInputs(registerValidation), verifyAndSignupOtp);
+adminRouter.post("/signup-verifyotp",authAdmin(["super_admin"]), loginLimiter, validateInputs(registerValidation), verifyAndSignupOtp);
 adminRouter.post("/login", loginLimiter, validateInputs(loginValidation), adminLogin);
 adminRouter.get('/logout', adminLogout);
 adminRouter.get('/current_admin', authAdmin(["admin", "super_admin"]), getAdmin);

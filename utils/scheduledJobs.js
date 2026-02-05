@@ -13,6 +13,9 @@ const batchProcess = async (items, batchSize, callback) => {
   }
 };
 
+
+
+
 // Expired subscriptions
 const checkExpiredSubscriptions = async () => {
   try {
@@ -60,6 +63,10 @@ const checkExpiredSubscriptions = async () => {
   }
 };
 
+
+
+
+
 // Subscription reminders
 const sendSubscriptionReminders = async () => {
   try {
@@ -101,6 +108,10 @@ const sendSubscriptionReminders = async () => {
   }
 };
 
+
+
+
+
 // Setup cron jobs
 const setupCronJobs = () => {
   // Expired subscriptions at 00:05
@@ -117,5 +128,9 @@ const setupCronJobs = () => {
 
   console.log('Cron jobs scheduled successfully');
 };
+
+
+
+
 
 export { setupCronJobs };

@@ -86,7 +86,7 @@ const verifyAndSignupOtp = async (req, res) => {
 const adminLogin = (req, res, next) => {
     passport.authenticate('admin-local', (err, user, info) => {
         if (err) {
-            return res.json({ success: false, message: "Internal Server Error" });
+            return res.json({ success: false, message: "Error, while logging u in" });
         }
         if (!user) {
             return res.json({ success: false, message: info.message });

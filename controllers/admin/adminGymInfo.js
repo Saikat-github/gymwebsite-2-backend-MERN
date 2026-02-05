@@ -4,7 +4,7 @@ import planModel from "../../models/admin/plans.js"
 const addNewPlan = async (req, res) => {
     try {
         const frontendData = req.body;
-        const newPlan = await planModel.create(frontendData);
+        await planModel.create(frontendData);
         res.json({ success: true, message: "New plan added successfully" });
     } catch (error) {
         console.log(error);
@@ -20,7 +20,7 @@ const updatePlan = async (req, res) => {
         if (!plan) {
             return res.json({ success: false, message: "Plan not found" });
         }
-        await planModel.findByIdAndUpdate(planId, updatedData, { runValidators: true });
+        await planModel.findByIdAndUpdate(planId, { $set : updatedData}, { runValidators: true });
         res.json({ success: true, message: "Plan updated successfully" });
     } catch (error) {
         console.log(error);

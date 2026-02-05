@@ -19,9 +19,6 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USERNAME,
     pass: process.env.EMAIL_PASSWORD_TWO
-  },
-  tls: {
-    rejectUnauthorized: false  // ← Add this for Railway
   }
 });
 
@@ -76,7 +73,7 @@ const sendOTPEmail = async (email, otp) => {
         <br>
         <p><strong>Team Minimalist Gym.</strong></p> </div>`
   };
-  await sendEmailWithRetry(mailOptions);
+  await sendEmailWithRetry(mailOptions, 1);
 };
 
 

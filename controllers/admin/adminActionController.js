@@ -20,6 +20,7 @@ const deleteUserAccount = async (req, res) => {
         const { userAuthId } = req.body;
         if (!userAuthId) {
             await session.abortTransaction();
+            session.endSession();
             return res.json({ success: false, message: "userAuthId is required" });
         }
 
@@ -36,6 +37,7 @@ const deleteUserAccount = async (req, res) => {
             // Require BOTH images to be deleted
             if (!(result1.result === "ok" && result2.result === "ok")) {
                 await session.abortTransaction();
+                session.endSession();
                 return res.status(500).json({
                     success: false,
                     message: "Failed to delete images",
@@ -89,6 +91,7 @@ const deleteMemberProfile = async (req, res) => {
         const userProfileData = await userProfileModel.findById(memberId).session(session);
         if (!userProfileData) {
             await session.abortTransaction();
+            session.endSession();
             return res.json({ success: false, message: "User profile not found" });
         }
 
@@ -101,6 +104,7 @@ const deleteMemberProfile = async (req, res) => {
         // 3️⃣ Ensure BOTH images deleted successfully
         if (!(result1.result === "ok" && result2.result === "ok")) {
             await session.abortTransaction();
+            session.endSession();
             return res.json({
                 success: false,
                 message: "Failed to delete images",
@@ -115,7 +119,7 @@ const deleteMemberProfile = async (req, res) => {
         await userDayPassModel.deleteMany({ userAuthId: userProfileData.userAuthId }, { session });
         await userAuthModel.findByIdAndUpdate(
             userProfileData.userAuthId,
-            { profileCompleted: false, profileId: null },
+            { $set: { profileCompleted: false, profileId: null } },
             { session }
         );
 
@@ -219,7 +223,7 @@ const markAsAvailed = async (req, res) => {
             return res.json({ success: false, message: "dayPassId is required" });
         }
 
-        await userDayPassModel.findByIdAndUpdate(dayPassId, { availed: true })
+        await userDayPassModel.findByIdAndUpdate(dayPassId, { $set: { availed: true }})
         res.json({ success: true, message: "Day pass has been mark as availed" })
     } catch (error) {
         console.log(error);

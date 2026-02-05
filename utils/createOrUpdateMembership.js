@@ -82,7 +82,7 @@ export const createOrUpdateMembership = async (paymentDetails, method = "online"
     await planModel.findByIdAndUpdate(
       paymentDoc.planId,
       { $inc: { noOfChosen: 1 } },
-      { upsert: true, new: true, session }
+      { new: true, session }
     );
 
     await session.commitTransaction();

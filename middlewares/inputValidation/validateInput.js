@@ -1,5 +1,5 @@
 // middlewares/validateInputs.js
-import { body, validationResult } from 'express-validator';
+import { validationResult } from 'express-validator';
 
 export const validateInputs = (validations) => {
   return async (req, res, next) => {

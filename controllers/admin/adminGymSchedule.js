@@ -6,7 +6,6 @@ import gymScheduleModel from "../../models/admin/gymSchedule.js";
 const addGymSchedule = async (req, res) => {
     try {
         const data = req.body;
-        console.log(data)
 
         const newSchedule = new gymScheduleModel(data);
         await newSchedule.save();
@@ -27,7 +26,7 @@ const updateGymSchedule = async (req, res) => {
             return res.json({ success: false, message: "Gym schedule not found" });
         }
 
-        const updatedSchedule = await gymScheduleModel.findByIdAndUpdate(scheduleId, data, { new: true });
+        const updatedSchedule = await gymScheduleModel.findByIdAndUpdate(scheduleId, { $set: data }, { new: true });
         res.json({ success: true, message: "Gym schedule updated successfully", schedule: updatedSchedule});
     } catch (error) {
         console.log(error);

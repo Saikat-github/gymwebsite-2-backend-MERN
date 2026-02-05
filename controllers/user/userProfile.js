@@ -1,16 +1,16 @@
-import userProfileModel from "../../models/user/userProfile.js";
+import mongoose from "mongoose";
 import { uploadToCloudinary, deleteFromCloudinary } from "../../config/cloudinary.js";
-import userAuthModel from "../../models/user/userAuth.js";
 import { sendProfileDeletionMail } from "../../utils/email.js";
 import { applyPagination, applyPaginationForDayPasses } from "../../utils/applyPagination.js";
-import userPaymentModel from "../../models/user/userPayment.js";
-import mongoose from "mongoose";
 import { generateSerialNumber } from "../../utils/generateSerialNumber.js";
+import userProfileModel from "../../models/user/userProfile.js";
+import userAuthModel from "../../models/user/userAuth.js";
 import userDayPassModel from "../../models/user/userDayPass.js";
+import userPaymentModel from "../../models/user/userPayment.js";
 
 
 
-//API to add doctor profile
+//API to add user profile
 const createUserProfile = async (req, res) => {
     try {
         const { files, body } = req;
@@ -144,52 +144,49 @@ const updateUserProfile = async (req, res) => {
             }
         };
 
+        // Build update object dynamically
+        const updateFields = {};
 
-        let imageRes = "";
-        let aadharRes = "";
         // Handle image upload
         if (files.image && files.image[0]) {
-            imageRes = await uploadFile(files.image[0].buffer, 'gymMembers/image');
+            const imageRes = await uploadFile(files.image[0].buffer, 'gymMembers/image');
+            updateFields['personalInfo.imageUrl'] = imageRes.url;
+            updateFields['personalInfo.imagePublicId'] = imageRes.public_id;
         }
 
-        // Handle license document upload
+        // Handle aadhar upload
         if (files.aadhar && files.aadhar[0]) {
-            aadharRes = await uploadFile(files.aadhar[0].buffer, 'gymMembers/aadhar');
+            const aadharRes = await uploadFile(files.aadhar[0].buffer, 'gymMembers/aadhar');
+            updateFields['personalInfo.aadharUrl'] = aadharRes.url;
+            updateFields['personalInfo.aadharPublicId'] = aadharRes.public_id;
         }
 
+        // Update personal info fields only if provided
+        if (body.name) updateFields['personalInfo.name'] = body.name;
+        if (body.email) updateFields['personalInfo.email'] = body.email;
+        if (body.phone) updateFields['personalInfo.phone'] = body.phone;
+        if (body.gender) updateFields['personalInfo.gender'] = body.gender;
+        if (body.dob) updateFields['personalInfo.dob'] = body.dob;
+        if (body.emergencyName) updateFields['personalInfo.emergencyName'] = body.emergencyName;
+        if (body.emergencyPhone) updateFields['personalInfo.emergencyPhone'] = body.emergencyPhone;
+        if (body.emergencyRelation) updateFields['personalInfo.emergencyRelation'] = body.emergencyRelation;
 
-        // Create user record
-        const newData = {
-            personalInfo: {
-                name: body.name || existingUser.personalInfo.name,
-                email: body.email || existingUser.personalInfo.email,
-                phone: body.phone || existingUser.personalInfo.phone,
-                gender: body.gender || existingUser.personalInfo.gender,
-                dob: body.dob || existingUser.personalInfo.dob,
-                emergencyName: body.emergencyName || existingUser.personalInfo.emergencyName,
-                emergencyPhone: body.emergencyPhone || existingUser.personalInfo.emergencyPhone,
-                emergencyRelation: body.emergencyRelation || existingUser.personalInfo.emergencyRelation,
-                imageUrl: imageRes.url || existingUser.personalInfo.imageUrl,
-                imagePublicId: imageRes.public_id || existingUser.personalInfo.imagePublicId,
-                aadharUrl: aadharRes.url || existingUser.personalInfo.aadharUrl,
-                aadharPublicId: aadharRes.public_id || existingUser.personalInfo.aadharPublicId,
-            },
-            healthInfo: {
-                height: body.height || existingUser.healthInfo.height,
-                weight: body.weight || existingUser.healthInfo.weight,
-                goal: body.goal || existingUser.healthInfo.goal,
-                hadMedicalCondition: body.hadMedicalCondition || existingUser.healthInfo.hadMedicalCondition,
-                conditions: body.conditions || existingUser.healthInfo.conditions,
-                otherConditions: body.otherConditions || existingUser.healthInfo.otherConditions
-            },
-            termsAndPolicy: body.termsAndPolicy || existingUser.termsAndPolicy,
-            userAuthId: req.userAuthId || existingUser.userAuthId,
-            rollNo: body.rollNo || existingUser.rollNo
-        };
+        // Update health info fields only if provided
+        if (body.height) updateFields['healthInfo.height'] = body.height;
+        if (body.weight) updateFields['healthInfo.weight'] = body.weight;
+        if (body.goal) updateFields['healthInfo.goal'] = body.goal;
+        if (body.hadMedicalCondition !== undefined) updateFields['healthInfo.hadMedicalCondition'] = body.hadMedicalCondition;
+        if (body.conditions) updateFields['healthInfo.conditions'] = body.conditions;
+        if (body.otherConditions) updateFields['healthInfo.otherConditions'] = body.otherConditions;
 
-        const updatedtUserProfile = await userProfileModel.findByIdAndUpdate(
+        // Update root level fields
+        if (body.termsAndPolicy !== undefined) updateFields['termsAndPolicy'] = body.termsAndPolicy;
+        if (body.rollNo) updateFields['rollNo'] = body.rollNo;
+
+        // Perform update with $set
+        const updatedUserProfile = await userProfileModel.findByIdAndUpdate(
             existingUser._id,
-            newData,
+            { $set: updateFields },
             { new: true, runValidators: true }
         );
 
@@ -220,6 +217,7 @@ const deleteProfile = async (req, res) => {
         const userProfileData = await userProfileModel.findOne({ userAuthId }).session(session);
         if (!userProfileData) {
             await session.abortTransaction();
+            session.endSession();
             return res.json({ success: false, message: "User profile not found" });
         }
 
@@ -232,6 +230,7 @@ const deleteProfile = async (req, res) => {
         // 3️⃣ Ensure BOTH images deleted successfully
         if (!(result1.result === "ok" && result2.result === "ok")) {
             await session.abortTransaction();
+            session.endSession();
             return res.json({ 
                 success: false, 
                 message: "Failed to delete images", 
@@ -241,14 +240,13 @@ const deleteProfile = async (req, res) => {
         }
 
         // 4️⃣ Delete profile + payments + update auth in one transaction
-        await userProfileModel.deleteOne({ _id: userProfileData._id }, { session });
-        await userPaymentModel.deleteMany({ userAuthId }, { session });
-        await userDayPassModel.deleteMany({userAuthId}, { session });
+        await userProfileModel.deleteOne({ _id: userProfileData._id }).session(session);
+        await userPaymentModel.deleteMany({ userAuthId }).session(session);
+        await userDayPassModel.deleteMany({ userAuthId }).session(session);
         await userAuthModel.findByIdAndUpdate(
             userAuthId, 
-            { profileCompleted: false, profileId: null },
-            { session }
-        );
+            { $set:{ profileCompleted: false, profileId: null }}
+        ).session(session);
 
         // 5️⃣ Commit transaction
         await session.commitTransaction();

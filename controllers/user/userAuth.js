@@ -1,15 +1,13 @@
 import passport from 'passport';
 import bcrypt from 'bcrypt';
-import userAuthModel from '../../models/user/userAuth.js';
-import { generateOTP, isValidEmail, sendAccountDeletionMail, sendOTPEmail } from '../../utils/email.js';
-import axios from "axios";
-import { otpModel } from '../../models/others/otpModel.js';
-import userProfileModel from '../../models/user/userProfile.js';
-import { deleteFromCloudinary } from '../../config/cloudinary.js';
-import userPaymentModel from '../../models/user/userPayment.js';
 import mongoose from 'mongoose';
+import { generateOTP, isValidEmail, sendAccountDeletionMail, sendOTPEmail } from '../../utils/email.js';
+import { otpModel } from '../../models/others/otpModel.js';
+import { deleteFromCloudinary } from '../../config/cloudinary.js';
+import userAuthModel from '../../models/user/userAuth.js';
+import userProfileModel from '../../models/user/userProfile.js';
 import userDayPassModel from '../../models/user/userDayPass.js';
-
+import userPaymentModel from '../../models/user/userPayment.js';
 
 
 
@@ -264,6 +262,7 @@ const deleteAccount = async (req, res) => {
         const { userAuthId } = req;
         if (!userAuthId) {
             await session.abortTransaction();
+            session.endSession();
             return res.json({ success: false, message: "userAuthId is required" });
         }
 
@@ -280,6 +279,7 @@ const deleteAccount = async (req, res) => {
             // Require BOTH images to be deleted
             if (!(result1.result === "ok" && result2.result === "ok")) {
                 await session.abortTransaction();
+                session.endSession();
                 return res.status(500).json({ 
                     success: false, 
                     message: "Failed to delete images", 
@@ -288,14 +288,14 @@ const deleteAccount = async (req, res) => {
                 });
             }
 
-            // Delete profile + payments in transaction
-            await userProfileModel.deleteOne({ _id: userProfileData._id }, { session });
-            await userPaymentModel.deleteMany({ userAuthId }, { session });
-            await userDayPassModel.deleteMany({ userAuthId }, { session });
+            // Delete profile + payments in transaction - NOW USING .session(session)
+            await userProfileModel.deleteOne({ _id: userProfileData._id }).session(session);
+            await userPaymentModel.deleteMany({ userAuthId }).session(session);
+            await userDayPassModel.deleteMany({ userAuthId }).session(session);
         }
 
-        // Delete auth record
-        await userAuthModel.findByIdAndDelete(userAuthId, { session });
+        // Delete auth record - NOW USING .session(session)
+        await userAuthModel.findByIdAndDelete(userAuthId).session(session);
 
         // Commit DB changes
         await session.commitTransaction();
