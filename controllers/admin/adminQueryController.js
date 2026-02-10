@@ -18,10 +18,10 @@ const getDashData = async (req, res) => {
                         _id: null,
                         totalProfiles: { $sum: 1 },
                         maleCount: {
-                            $sum: { $cond: [{ $eq: ["$personalInfo.gender", "male"] }, 1, 0 ]}
+                            $sum: { $cond: [{ $eq: ["$personalInfo.gender", "male"] }, 1, 0] }
                         },
                         femaleCount: {
-                            $sum: {$cond: [{ $eq: ["$personalInfo.gender", "female"] }, 1, 0 ]}
+                            $sum: { $cond: [{ $eq: ["$personalInfo.gender", "female"] }, 1, 0] }
                         }
                     }
                 }
@@ -187,7 +187,9 @@ const getAllPayments = async (req, res) => {
     try {
         const { startDate, endDate, cursor } = req.query;
 
-        let query = {};
+        let query = {
+            paymentStatus: { $ne: "created" }
+        };
         if (startDate && endDate) {
             // Validate date formats
             const startDateObj = new Date(startDate);
@@ -209,11 +211,9 @@ const getAllPayments = async (req, res) => {
                 });
             }
 
-            query = {
-                createdAt: {
-                    $gte: startDateObj,
-                    $lte: endDateObj,
-                },
+            query.createdAt = {
+                $gte: startDateObj,
+                $lte: endDateObj,
             };
         }
 

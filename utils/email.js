@@ -1,26 +1,26 @@
 import nodemailer from 'nodemailer';
 
 const frontendUrl = process.env.FRONTEND_URL
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD
-  }
-});
-
-
-
-// Updated transporter configuration with more robust settings
 // const transporter = nodemailer.createTransport({
-//   host: 'smtp.gmail.com',
-//   port: 465,        // ← Change from 587 to 465
-//   secure: true,     // ← Change from false to true
+//   service: 'gmail',
 //   auth: {
 //     user: process.env.EMAIL_USERNAME,
 //     pass: process.env.EMAIL_PASSWORD
 //   }
 // });
+
+
+
+// Updated transporter configuration with more robust settings
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,        // ← Change from 587 to 465
+  secure: true,     // ← Change from false to true
+  auth: {
+    user: process.env.EMAIL_USERNAME,
+    pass: process.env.EMAIL_PASSWORD
+  }
+});
 
 
 
@@ -73,7 +73,7 @@ const sendOTPEmail = async (email, otp) => {
         <br>
         <p><strong>Team Minimalist Gym.</strong></p> </div>`
   };
-  await sendEmailWithRetry(mailOptions, 1);
+  await sendEmailWithRetry(mailOptions);
 };
 
 
