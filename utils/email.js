@@ -1,51 +1,26 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
+const resend = new Resend(process.env.RESEND_API_KEY);
 const frontendUrl = process.env.FRONTEND_URL
-// const transporter = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: process.env.EMAIL_USERNAME,
-//     pass: process.env.EMAIL_PASSWORD
-//   }
-// });
+
+const FROM_EMAIL = process.env.EMAIL_FROM
 
 
 
-// Updated transporter configuration with more robust settings
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,        // ← Change from 587 to 465
-  secure: true,     // ← Change from false to true
-  auth: {
-    user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD
-  }
-});
 
-
-
-// Add connection verification
-transporter.verify((error, success) => {
-  if (error) {
-    console.log('SMTP connection error:', error);
-  } else {
-    console.log('SMTP server is ready to take messages');
-  }
-});
-
-
-
-const sendEmailWithRetry = async (mailOptions, maxRetries = 3) => {
+const sendEmailWithRetry = async (emailOptions, maxRetries = 2) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const result = await transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent successfully on attempt ${attempt}`);
-      return result;
+      const {data, error} = await resend.emails.send(emailOptions); 
+      if (error) {
+        console.log({error})
+        throw new Error({error})
+      }
     } catch (error) {
-      console.error(`❌ Email attempt ${attempt} failed:`, error.message);
+      console.log(`❌ Email attempt ${attempt} failed:`);
 
       if (attempt === maxRetries) {
-        throw new Error(`Failed to send email after ${maxRetries} attempts: ${error.message}`);
+        throw new Error(`Failed to send email after ${maxRetries} attempts`);
       }
 
       // Wait before retry (exponential backoff)
@@ -57,10 +32,10 @@ const sendEmailWithRetry = async (mailOptions, maxRetries = 3) => {
 
 
 
-//Forget password otp sending mail
+//OTP sending mail
 const sendOTPEmail = async (email, otp) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: FROM_EMAIL,
     to: email,
     subject: 'OTP for Minimalist Gym',
     html: `
@@ -84,7 +59,7 @@ const sendSubscriptionExpiredEmail = async (email, name = "User", endDate) => {
   const options = { month: 'long', day: 'numeric', year: 'numeric' };
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: FROM_EMAIL,
     to: email,
     subject: 'Your Membership Has Expired. Renew Now!',
     html: `
@@ -101,7 +76,7 @@ const sendReminderEmail = async (email, name, endDate) => {
     (endDate - new Date()) / (1000 * 60 * 60 * 24)
   );
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: FROM_EMAIL,
     to: email,
     subject: `Your membership is expiring in ${daysLeft} days`,
     html: `
@@ -114,12 +89,10 @@ const sendReminderEmail = async (email, name, endDate) => {
 
 
 
-
-
-//Subscription cancel mail sending
+//Profile Deletion Mail
 const sendProfileDeletionMail = async (email, name = "User") => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: FROM_EMAIL,
     to: email,
     subject: `Profile Deleted`,
     html: `
@@ -129,10 +102,11 @@ const sendProfileDeletionMail = async (email, name = "User") => {
 }
 
 
-//Subscription cancel mail sending
+
+//Account Deletion Mail
 const sendAccountDeletionMail = async (email, name = "User") => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: FROM_EMAIL,
     to: email,
     subject: `Account Deleted`,
     html: `
@@ -150,11 +124,11 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
-
 
 
 const isOTPExpired = (expiryDate) => {
@@ -163,4 +137,15 @@ const isOTPExpired = (expiryDate) => {
 
 
 
-export { generateOTP, isOTPExpired, sendOTPEmail, sendReminderEmail, sendSubscriptionExpiredEmail, isValidEmail, sendProfileDeletionMail, sendAccountDeletionMail };
+
+
+export {
+  generateOTP,
+  isOTPExpired,
+  sendOTPEmail,
+  sendReminderEmail,
+  sendSubscriptionExpiredEmail,
+  isValidEmail,
+  sendProfileDeletionMail,
+  sendAccountDeletionMail
+};
