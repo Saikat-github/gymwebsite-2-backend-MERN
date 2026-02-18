@@ -6,11 +6,11 @@ const connectDB = async () => {
     try {
         mongoose.connection.on("connected", () => {
             console.log("Connected to MongoDB");
-            try {
-                setupCronJobs();
-            } catch (error) {
-                console.log("Failed to setup scheduled cron jobs", error)
-            }
+            // try {
+            //     setupCronJobs();
+            // } catch (error) {
+            //     console.log("Failed to setup scheduled cron jobs", error)
+            // }
         });
         await mongoose.connect(`${process.env.MONGO_URI}/gym`);
     } catch (error) {

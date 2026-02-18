@@ -16,6 +16,7 @@ const sendEmailWithRetry = async (emailOptions, maxRetries = 2) => {
         console.log({error})
         throw new Error({error})
       }
+      return data;
     } catch (error) {
       console.log(`❌ Email attempt ${attempt} failed:`);
 
