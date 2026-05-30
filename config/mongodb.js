@@ -4,19 +4,18 @@ import { setupCronJobs } from "../utils/scheduledJobs.js";
 
 const connectDB = async () => {
     try {
-        mongoose.connection.on("connected", () => {
-            console.log("Connected to MongoDB");
-            // try {
-            //     setupCronJobs();
-            // } catch (error) {
-            //     console.log("Failed to setup scheduled cron jobs", error)
-            // }
-        });
         await mongoose.connect(`${process.env.MONGO_URI}/gym`);
+        console.log("MongoDB connected");
+        // try {
+        //     setupCronJobs();
+        // } catch (error) {
+        //     console.log("Failed to setup scheduled cron jobs", error)
+        // }
     } catch (error) {
-        console.error(`Error: ${error}`);
+        console.error("MongoDB connection failed:", error);
         process.exit(1);
     }
 };
 
 export default connectDB;
+
